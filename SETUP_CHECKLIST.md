@@ -4,6 +4,8 @@
 - [ ] Run `supabase/migrations/0001_initial_schema.sql` in SQL Editor.
 - [ ] Run `supabase/migrations/0002_inventory_rpcs.sql` in SQL Editor (inventory atomic RPCs & security policies).
 - [ ] Run `supabase/migrations/0003_purchase_and_opening_stock.sql` in SQL Editor (WAC, multi-item purchase receipt, opening stock migration).
+- [ ] Run `supabase/migrations/0004_projects_customers_and_material_return.sql` in SQL Editor (projects, customers, and material returns).
+- [ ] Run `supabase/migrations/0005_fix_product_delete_constraint.sql` in SQL Editor (fix foreign key constraint on price_history when deleting products).
 - [x] Copy `.env.example` to `.env.local` and add Supabase URL + anon/publishable key.
 - [ ] Set Supabase Site URL (`http://localhost:3000`) and Redirect URL (`http://localhost:3000/auth/callback`).
 - [ ] Configure Google OAuth provider (in Supabase Auth -> Providers -> Google, add Client ID & Client Secret).
