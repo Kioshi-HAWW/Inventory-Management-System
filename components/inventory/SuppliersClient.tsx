@@ -143,6 +143,9 @@ export default function SuppliersClient({ suppliers: initial, userRole }: Props)
         <Link href="/dashboard/inventory/purchases" className="tab">
           Purchases
         </Link>
+        <Link href="/dashboard/inventory/import" className="tab">
+          Smart Import
+        </Link>
       </div>
       <div className="inv-header">
         <div>

@@ -24,6 +24,7 @@ const nav = [
 ];
 
 function getBreadcrumb(pathname: string): string {
+  if (pathname.startsWith("/dashboard/inventory/import")) return "Smart Import";
   if (pathname.startsWith("/dashboard/inventory/purchases")) return "Purchases";
   if (pathname.startsWith("/dashboard/inventory")) return "Inventory";
   if (pathname.startsWith("/dashboard/projects")) return "Projects & Work";

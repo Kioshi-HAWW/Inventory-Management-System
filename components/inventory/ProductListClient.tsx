@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Plus, Edit2, Trash2, Package } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Package, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import StockBadge from "@/components/inventory/StockBadge";
 import DeleteConfirmModal from "@/components/inventory/DeleteConfirmModal";
@@ -105,6 +105,9 @@ export default function ProductListClient({ products: initialProducts, categorie
         <Link href="/dashboard/inventory/purchases" className="tab">
           Purchases
         </Link>
+        <Link href="/dashboard/inventory/import" className="tab">
+          Smart Import
+        </Link>
       </div>
 
       <div className="inv-header">
@@ -112,9 +115,18 @@ export default function ProductListClient({ products: initialProducts, categorie
           <p className="eyebrow">INVENTORY</p>
           <h1>Products</h1>
         </div>
-        <button className="primary-button" onClick={() => router.push("/dashboard/inventory/new")}>
-          <Plus size={15} /> Add product
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <button
+            className="subtle-button"
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "10px 14px", fontSize: 13, fontWeight: 700, color: "#246bfd" }}
+            onClick={() => router.push("/dashboard/inventory/import")}
+          >
+            <Sparkles size={14} /> Smart Import
+          </button>
+          <button className="primary-button" onClick={() => router.push("/dashboard/inventory/new")}>
+            <Plus size={15} /> Add product
+          </button>
+        </div>
       </div>
 
       <div className="inv-toolbar">

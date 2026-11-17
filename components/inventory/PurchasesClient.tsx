@@ -107,6 +107,9 @@ export default function PurchasesClient({ purchases: initialPurchases }: Props) 
         <Link href="/dashboard/inventory/purchases" className="tab active">
           Purchases
         </Link>
+        <Link href="/dashboard/inventory/import" className="tab">
+          Smart Import
+        </Link>
       </div>
 
       <div className="inv-header">
