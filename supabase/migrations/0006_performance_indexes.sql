@@ -1,10 +1,7 @@
 -- Migration 0006: High-performance composite and partial indexes
 -- Optimizes product lookup, search, auth checks, stock ledgers, and transactions
 
--- 1. Auth & Business lookup (executed on almost every page request via middleware / layouts)
-create index if not exists idx_business_members_user_biz
-  on public.business_members(user_id, business_id);
-
+-- 1. Profiles & Business Tenancy (checked on every page request)
 create index if not exists idx_profiles_business
   on public.profiles(business_id);
 
@@ -27,27 +24,18 @@ create index if not exists idx_products_active_low_stock
   where is_active = true and minimum_stock > 0 and current_stock <= minimum_stock;
 
 -- 3. Price history lookup for product detail page
-create index if not exists idx_price_history_prod_recorded
-  on public.price_history(product_id, business_id, recorded_at desc);
+create index if not exists idx_price_history_prod_effective
+  on public.price_history(product_id, business_id, effective_at desc);
 
--- 4. Projects, materials & returns
+-- 4. Projects and Materials
 create index if not exists idx_projects_biz_created
   on public.projects(business_id, created_at desc);
 
 create index if not exists idx_projects_biz_customer
   on public.projects(business_id, customer_id);
 
-create index if not exists idx_project_materials_proj_biz
-  on public.project_materials(project_id, business_id);
-
 create index if not exists idx_project_materials_prod_biz
   on public.project_materials(product_id, business_id);
-
-create index if not exists idx_project_returns_proj_biz
-  on public.project_material_returns(project_id, business_id);
-
-create index if not exists idx_project_returns_prod_biz
-  on public.project_material_returns(product_id, business_id);
 
 -- 5. Purchases & Suppliers
 create index if not exists idx_purchases_biz_supplier
