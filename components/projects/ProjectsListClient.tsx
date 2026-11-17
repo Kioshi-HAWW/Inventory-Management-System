@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -53,6 +53,7 @@ export default function ProjectsListClient({
 
   const [projects, setProjects] = useState<Project[]>(initialProjects);
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
   const [statusFilter, setStatusFilter] = useState<'all' | ProjectStatus>('all');
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -69,7 +70,7 @@ export default function ProjectsListClient({
   const [error, setError] = useState('');
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
+    const q = deferredQuery.toLowerCase().trim();
     return projects.filter((p) => {
       const matchStatus = statusFilter === 'all' || p.status === statusFilter;
       const matchSearch =
@@ -80,7 +81,7 @@ export default function ProjectsListClient({
         (p.customers?.name || '').toLowerCase().includes(q);
       return matchStatus && matchSearch;
     });
-  }, [projects, query, statusFilter]);
+  }, [projects, deferredQuery, statusFilter]);
 
   function openCreate() {
     setProjectCode(autoGenProjectCode());

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Search,
@@ -32,6 +32,7 @@ export default function CustomersClient({ customers: initialCustomers, userRole 
 
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
@@ -47,7 +48,7 @@ export default function CustomersClient({ customers: initialCustomers, userRole 
   const [error, setError] = useState('');
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase().trim();
+    const q = deferredQuery.toLowerCase().trim();
     if (!q) return customers;
     return customers.filter((c) => {
       const matchName = (c.name || '').toLowerCase().includes(q);
@@ -57,7 +58,7 @@ export default function CustomersClient({ customers: initialCustomers, userRole 
       const matchCity = (c.billing_address || '').toLowerCase().includes(q);
       return matchName || matchPhone || matchEmail || matchGstin || matchCity;
     });
-  }, [customers, query]);
+  }, [customers, deferredQuery]);
 
   function openCreate() {
     setEditingCustomer(null);

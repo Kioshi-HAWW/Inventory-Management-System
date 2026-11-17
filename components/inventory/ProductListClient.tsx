@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useDeferredValue } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Search, Plus, Edit2, Trash2, Package, Sparkles } from "lucide-react";
+import { Search, Plus, Edit2, Trash2, Package, Sparkles, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import StockBadge from "@/components/inventory/StockBadge";
 import DeleteConfirmModal from "@/components/inventory/DeleteConfirmModal";
@@ -23,14 +23,18 @@ interface Props {
   lowStock: LowStockProduct[];
 }
 
+const INITIAL_PAGE_SIZE = 50;
+
 export default function ProductListClient({ products: initialProducts, categories, businessId, userRole, lowStock: initialLowStock }: Props) {
   const router = useRouter();
   const supabase = createClient();
 
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
+  const [pageSize, setPageSize] = useState(INITIAL_PAGE_SIZE);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
@@ -56,7 +60,7 @@ export default function ProductListClient({ products: initialProducts, categorie
   }, [businessId]);
 
   const filtered = useMemo(() => {
-    const q = search.toLowerCase();
+    const q = deferredSearch.toLowerCase().trim();
     return products.filter((p) => {
       const matchSearch = !q || p.name.toLowerCase().includes(q) || (p.sku ?? "").toLowerCase().includes(q);
       const matchCat = categoryFilter === "all" || p.category_id === categoryFilter;
@@ -68,7 +72,12 @@ export default function ProductListClient({ products: initialProducts, categorie
         (stockFilter === "low" && isLow);
       return matchSearch && matchCat && matchStock;
     });
-  }, [products, search, categoryFilter, stockFilter]);
+  }, [products, deferredSearch, categoryFilter, stockFilter]);
+
+  // Paginated/windowed display to prevent DOM lag on large product lists
+  const visibleProducts = useMemo(() => {
+    return filtered.slice(0, pageSize);
+  }, [filtered, pageSize]);
 
   async function handleDelete() {
     if (!deleteTarget) return;
@@ -135,14 +144,20 @@ export default function ProductListClient({ products: initialProducts, categorie
           <input
             placeholder="Search by name or SKU…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPageSize(INITIAL_PAGE_SIZE);
+            }}
           />
         </div>
 
         <select
           className="select-input"
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
+          onChange={(e) => {
+            setCategoryFilter(e.target.value);
+            setPageSize(INITIAL_PAGE_SIZE);
+          }}
         >
           <option value="all">All categories</option>
           {categories.map((c) => (
@@ -153,7 +168,10 @@ export default function ProductListClient({ products: initialProducts, categorie
         <select
           className="select-input"
           value={stockFilter}
-          onChange={(e) => setStockFilter(e.target.value as StockFilter)}
+          onChange={(e) => {
+            setStockFilter(e.target.value as StockFilter);
+            setPageSize(INITIAL_PAGE_SIZE);
+          }}
         >
           <option value="all">All stock status</option>
           <option value="low">Low stock</option>
@@ -188,7 +206,7 @@ export default function ProductListClient({ products: initialProducts, categorie
                 </td>
               </tr>
             )}
-            {filtered.map((p) => {
+            {visibleProducts.map((p) => {
               const low = isLowStock(p);
               const out = isOutStock(p);
               return (
@@ -237,6 +255,18 @@ export default function ProductListClient({ products: initialProducts, categorie
           </tbody>
         </table>
       </div>
+
+      {filtered.length > pageSize && (
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <button
+            className="subtle-button"
+            style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", fontSize: 13 }}
+            onClick={() => setPageSize((prev) => prev + INITIAL_PAGE_SIZE)}
+          >
+            <ChevronDown size={14} /> Show more ({filtered.length - pageSize} remaining)
+          </button>
+        </div>
+      )}
 
       {deleteError && <div className="notice error" style={{ marginTop: 12 }}>{deleteError}</div>}
 
